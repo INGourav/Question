@@ -1,0 +1,53 @@
+module "vm_server" {
+  source = "../../rsazure-internal-terraform-12/modules/compute/vm_server/"
+ 
+  vm_count              = 1 # How Many VMs, we want to create
+  vm_count_start        = 2 # From where the count would start
+  vm_count_zero_padding = 2 # Set to 0 to create a single server with no number suffix, it is likly the number of digit that we want in it server
+ 
+  vm_rsg_name     = data.azurerm_resource_group.net.name
+  vm_subnet_id    = data.azurerm_subnet.subnet.id
+  vm_name         = "weupraxweb"
+  vm_size         = "Standard_D8_v3"
+  vm_disk_sku     = "Standard_LRS"
+  vm_os_disk_size = 32
+ 
+  image_publisher = "OpenLogic"
+  image_offer     = "CentOS"
+  image_sku       = "7.7"
+  image_version   = "latest"
+  os_type         = "Linux" # Either Windows or Linux
+ 
+  # Uncomment to define static IPs for the NIC
+  #
+  # nic_private_ip_allocation_method = "Static"
+  # nic_private_ip_address           = ["192.168.50.5"]
+  # vm_pip_id                        = [module.pip.outputs.id]
+  # vm_nic_dns                       = ["dnsname"]
+  # vm_nic_accelerate                = false
+ 
+  # Uncomment to define either an Availability Set or Availability Zone.
+  # For zones, define which zones to create the VM(s) in. Will loop in ascending order (eg. 1, 2, 3, 1, 2, 3)
+  #
+   vm_avset_id = data.azurerm_availability_set.name.id
+  # vm_avzones  = ["1", "2", "3"]
+ 
+  # Uncomment to define additional data disks.
+  # See vm_server_disks.tf to add disks.
+  #
+  drive_list = var.data_drives
+ 
+  # Uncomment to set timezone away from default of UTC.
+  # Uncomment to enable boot diagnostics.
+  # Uncomment to set a custom admin username other than the default <servername>-adm.
+  #
+   vm_timezone     = var.vm_timezone
+  # vmdiag_sa       = data.azurerm_storage_account.diagnostics.primary_blob_endpoint
+  # admin_username  = "custom-name"
+ 
+  admin_password  = random_string.password_vm.result
+  location        = var.location
+  environment     = var.environment
+  tag_buildby     = var.buildby
+  tag_buildticket = var.buildticket
+}
